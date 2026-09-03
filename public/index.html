@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MicinPal</title>
+    <title>MicinPal — Palworld Community Server</title>
     <meta name="description" content="Server Palworld Indonesia untuk bermain, membangun, menjelajah, dan bermain bersama komunitas.">
     
     <!-- Favicon / Logo Browser (Chickipi Palworld) -->
@@ -539,11 +539,15 @@
         }
 
         /* ==========================================
-           YOUTUBE CLIENT-SIDE RSS MANAGER (Vercel Safe)
+           YOUTUBE AUTO-REFRESH MANAGER (Vercel Safe)
         ========================================== */
         class MicinPalAppManager {
             constructor() {
                 this.fetchYouTubeFeed();
+                // Melakukan pengecekan otomatis setiap 2 menit (120000ms) tanpa refresh halaman
+                setInterval(() => {
+                    this.fetchYouTubeFeed();
+                }, 120000);
             }
 
             async fetchYouTubeFeed() {
@@ -573,30 +577,30 @@
 
                         if (!videoId) throw new Error("Video ID tidak ditemukan");
 
-                        navLiveIndicator.className = "w-2 h-2 rounded-full bg-red badge-live inline-block";
-                        sectionLiveDot.className = "w-3 h-3 rounded-full bg-red badge-live inline-block";
-                        
-                        statusBadge.className = "mb-4 inline-block px-3 py-1 rounded bg-red/20 text-red text-xs font-bold uppercase tracking-widest border border-red/30 w-max badge-live";
-                        statusBadge.innerHTML = `<i class="fa-solid fa-video mr-1"></i> LATEST VIDEO`;
+                        // Cek apakah video baru berbeda dengan yang sedang diputar saat ini
+                        const currentStoredId = playerContainer.dataset.videoId;
+                        if (currentStoredId !== videoId) {
+                            playerContainer.dataset.videoId = videoId;
+                            
+                            navLiveIndicator.className = "w-2 h-2 rounded-full bg-red badge-live inline-block";
+                            sectionLiveDot.className = "w-3 h-3 rounded-full bg-red badge-live inline-block";
+                            
+                            statusBadge.className = "mb-4 inline-block px-3 py-1 rounded bg-red/20 text-red text-xs font-bold uppercase tracking-widest border border-red/30 w-max badge-live";
+                            statusBadge.innerHTML = `<i class="fa-solid fa-video mr-1"></i> LATEST VIDEO`;
 
-                        titleEl.textContent = latestVideo.title;
-                        channelEl.textContent = latestVideo.author || "MicinPal Official Channel";
-                        descEl.textContent = "Tonton video terbaru dan update seputar server Palworld Indonesia bersama komunitas MicinPal.";
-                        linkBtn.href = latestVideo.link;
+                            titleEl.textContent = latestVideo.title;
+                            channelEl.textContent = latestVideo.author || "MicinPal Official Channel";
+                            descEl.textContent = "Tonton video terbaru dan update seputar server Palworld Indonesia bersama komunitas MicinPal.";
+                            linkBtn.href = latestVideo.link;
 
-                        playerContainer.innerHTML = `<iframe class="w-full h-full absolute inset-0" src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&enablejsapi=1" title="${latestVideo.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                            // Memuat ulang iframe otomatis jika video berubah
+                            playerContainer.innerHTML = `<iframe class="w-full h-full absolute inset-0" src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&enablejsapi=1" title="${latestVideo.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                        }
                     } else {
                         throw new Error("Feed kosong");
                     }
                 } catch (error) {
-                    console.log("YouTube RSS fallback:", error.message);
-                    statusBadge.className = "mb-4 inline-block px-3 py-1 rounded bg-white/5 text-gray-400 text-xs font-bold uppercase tracking-widest border border-white/10 w-max";
-                    statusBadge.innerHTML = `<i class="fa-brands fa-youtube mr-1"></i> YOUTUBE CHANNEL`;
-
-                    titleEl.textContent = "MicinPal Official";
-                    descEl.textContent = "Kunjungi channel YouTube resmi kami untuk melihat berbagai konten dan siaran langsung seputar server.";
-                    linkBtn.href = "https://www.youtube.com/@micinpal";
-                    playerContainer.innerHTML = `<div class="absolute inset-0 flex items-center justify-center flex-col text-gray-500 bg-card"><i class="fa-brands fa-youtube text-5xl text-red mb-3"></i><p class="font-sans text-sm uppercase tracking-widest text-white">MICINPAL YOUTUBE</p></div>`;
+                    console.log("YouTube RSS auto-refresh notice:", error.message);
                 }
             }
         }
