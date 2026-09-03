@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicinPal — Palworld Community Server</title>
+    <meta name="description" content="Server Palworld Indonesia untuk bermain, membangun, menjelajah, dan bermain bersama komunitas.">
+    
+    <!-- Favicon / Logo Browser (Chickipi Palworld) -->
+    <link rel="icon" type="image/png" href="https://palworld.gg/_ipx/q_80&s_130x130/images/full_palicon/T_ChickenPal_icon_normal.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#0B1117',
+                        secondary: '#121A23',
+                        card: '#18232E',
+                        primary: '#3B82F6',
+                        cyan: '#22D3EE',
+                        green: '#22C55E',
+                        warning: '#FACC15',
+                        red: '#EF4444'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Rajdhani', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --glow-cyan: 0 0 20px rgba(34, 211, 238, 0.4);
+            --glow-blue: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        body { background-color: #0B1117; color: #ffffff; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0B1117; }
+        ::-webkit-scrollbar-thumb { background: #3B82F6; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #22D3EE; }
+
+        @media (pointer: fine) {
+            body { cursor: none; }
+            .cursor-dot {
+                position: fixed; top: 0; left: 0; width: 6px; height: 6px;
+                background-color: #22D3EE; border-radius: 50%;
+                pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
+                box-shadow: var(--glow-cyan); transition: transform 0.1s;
+            }
+            .cursor-ring {
+                position: fixed; top: 0; left: 0; width: 36px; height: 36px;
+                border: 1px solid rgba(34, 211, 238, 0.5); border-radius: 50%;
+                pointer-events: none; z-index: 9998; transform: translate(-50%, -50%);
+                transition: width 0.2s, height 0.2s, background-color 0.2s;
+            }
+            .hover-effect:hover ~ .cursor-ring { width: 48px; height: 48px; background-color: rgba(34, 211, 238, 0.1); }
+        }
+
+        .glass { background: rgba(24, 35, 46, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-nav { background: rgba(11, 17, 23, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
+        .btn-primary { background: linear-gradient(90deg, #3B82F6 0%, #22D3EE 100%); position: relative; overflow: hidden; z-index: 1; transition: transform 0.3s, box-shadow 0.3s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--glow-cyan); }
+        
+        .hero-bg {
+            background: var(--hero-bg-image) center/cover no-repeat;
+            position: absolute; inset: 0; z-index: -2;
+            filter: brightness(0.75) saturate(1.1);
+        }
+        .hero-overlay { background: linear-gradient(to bottom, rgba(11, 17, 23, 0.3) 0%, rgba(11, 17, 23, 0.85) 85%, #0B1117 100%); position: absolute; inset: 0; z-index: -1; }
+
+        /* Efek Spoiler Blur */
+        .spoiler-blur {
+            filter: blur(6px);
+            transition: filter 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .spoiler-blur:hover, .spoiler-blur:focus {
+            filter: blur(0);
+        }
+
+        @keyframes pulse-live { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        @keyframes pulse-online { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        .badge-live { animation: pulse-live 2s infinite; }
+        .badge-online { animation: pulse-online 2s infinite; }
+
+        #loader { position: fixed; inset: 0; background: #0B1117; z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
+        .loader-bar { width: 200px; height: 4px; background: #18232E; border-radius: 2px; margin-top: 20px; overflow: hidden; }
+        .loader-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #3B82F6, #22D3EE); animation: fillBar 1.2s ease-out forwards; }
+        @keyframes fillBar { to { width: 100%; } }
+    </style>
+    
+    <script>
+        const SITE_CONFIG = {
+            heroImage: "https://cdn5.idcgames.com/storage/image/1448/game_home_bg_section_2/default.jpg"
+        };
+        document.addEventListener("DOMContentLoaded", () => {
+            document.documentElement.style.setProperty('--hero-bg-image', `url('${SITE_CONFIG.heroImage}')`);
+        });
+    </script>
+</head>
+<body class="antialiased">
+
+    <div class="cursor-dot hidden md:block"></div>
+    <div class="cursor-ring hidden md:block"></div>
+
+    <div id="loader">
+        <h1 class="font-display text-4xl font-bold tracking-widest">MICIN<span class="text-cyan">PAL</span></h1>
+        <p class="text-xs text-gray-400 mt-2 tracking-widest uppercase">Palworld Community Server</p>
+        <div class="loader-bar"><div class="loader-fill"></div></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 py-5 px-6 lg:px-12">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#home" class="hover-effect font-display font-bold text-2xl tracking-wider flex items-center gap-3">
+                <img src="https://palworld.gg/_ipx/q_80&s_130x130/images/full_palicon/T_ChickenPal_icon_normal.png" alt="MicinPal Logo" class="w-10 h-10 rounded-full border border-cyan/40 bg-card p-1 object-cover shadow-[0_0_10px_rgba(34,211,238,0.3)]">
+                <span>MICIN<span class="text-cyan">PAL</span></span>
+            </a>
+            
+            <div class="hidden lg:flex items-center gap-8 font-sans text-sm font-semibold text-gray-300">
+                <a href="#home" class="hover-effect hover:text-white transition-colors">HOME</a>
+                <a href="#live" class="hover-effect hover:text-red transition-colors flex items-center gap-2">
+                    <span id="nav-live-indicator" class="w-2 h-2 rounded-full bg-gray-500 inline-block"></span> LIVE
+                </a>
+                <a href="#discord" class="hover-effect hover:text-white transition-colors">DISCORD</a>
+                <a href="#info" class="hover-effect hover:text-white transition-colors">RULES & INFO</a>
+                <a href="#faq" class="hover-effect hover:text-white transition-colors">FAQ</a>
+            </div>
+            
+            <a href="#discord" class="hidden lg:block hover-effect btn-primary px-6 py-2 rounded text-sm font-display font-bold tracking-wider text-white">
+                JOIN DISCORD
+            </a>
+
+            <button id="mobile-menu-btn" class="lg:hidden text-2xl text-white focus:outline-none">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+        
+        <div id="mobile-menu" class="hidden lg:hidden absolute top-full left-0 w-full bg-secondary border-b border-white/5 flex flex-col p-6 gap-4 font-sans font-semibold">
+            <a href="#home" class="text-gray-300 hover:text-white">HOME</a>
+            <a href="#live" class="text-red flex items-center gap-2">LIVE STREAM</a>
+            <a href="#discord" class="text-gray-300 hover:text-white">DISCORD</a>
+            <a href="#info" class="text-gray-300 hover:text-white">RULES & INFO</a>
+            <a href="#faq" class="text-gray-300 hover:text-white">FAQ</a>
+            <a href="#discord" class="btn-primary text-center py-3 rounded mt-2">JOIN DISCORD</a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 pb-16">
+        <div class="hero-bg" id="parallax-bg"></div>
+        <div class="hero-overlay"></div>
+
+        <div class="relative z-10 max-w-5xl mx-auto px-6 w-full flex flex-col items-center text-center">
+            <h1 class="gsap-hero font-display text-6xl md:text-8xl lg:text-[7rem] font-bold leading-none mb-4 drop-shadow-2xl">
+                MICIN<span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan">PAL</span>
+            </h1>
+            <div class="gsap-hero text-cyan font-display tracking-widest text-sm uppercase mb-4 font-bold">PALWORLD COMMUNITY SERVER</div>
+            <p class="gsap-hero font-sans text-lg md:text-xl text-gray-300 mb-8 max-w-2xl leading-relaxed">
+                "Server Palworld Indonesia untuk bermain, membangun, menjelajah, dan bermain bersama komunitas."
+            </p>
+            
+            <div class="gsap-hero flex flex-col sm:flex-row gap-4 mb-12">
+                <a href="#live" class="hover-effect btn-primary px-8 py-4 rounded font-display font-bold text-lg tracking-wider flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-play"></i> WATCH LIVE
+                </a>
+                <a href="#discord" class="hover-effect bg-[#5865F2] hover:bg-[#4752C4] transition px-8 py-4 rounded font-display font-bold text-lg text-white tracking-wider flex items-center justify-center gap-3">
+                    <i class="fa-brands fa-discord"></i> JOIN DISCORD
+                </a>
+            </div>
+
+            <!-- KOTAK SERVER ACCESS & SPOILER PASSWORD -->
+            <div class="gsap-hero glass w-full max-w-xl p-6 rounded-xl border border-cyan/30 shadow-[0_0_30px_rgba(34,211,238,0.15)] text-left flex flex-col gap-4">
+                <div class="flex justify-between items-center pb-3 border-b border-white/10">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-green badge-online inline-block"></span>
+                        <span class="font-display font-bold text-white tracking-wider uppercase text-sm">MICINPAL DEDICATED SERVER</span>
+                    </div>
+                    <span class="text-xs bg-cyan/10 text-cyan px-2.5 py-1 rounded font-bold uppercase tracking-wider border border-cyan/20">24/7 ONLINE</span>
+                </div>
+
+                <!-- Server IP & Port Row -->
+                <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                    <div class="w-full">
+                        <label class="block text-gray-400 text-xs uppercase font-bold tracking-wider mb-1 font-sans">Server IP & Port</label>
+                        <input type="text" readonly value="micinpal.fun:24090" class="w-full bg-black/60 border border-white/10 rounded px-4 py-3 font-mono text-base text-cyan focus:outline-none select-all">
+                    </div>
+                    <div class="flex gap-2 w-full sm:w-auto shrink-0 self-end">
+                        <a href="steam://run/1623730//+open micinpal.fun:24090" class="hover-effect bg-green hover:bg-green-600 transition text-white px-5 py-3 rounded font-display font-bold text-sm tracking-wider flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-gamepad"></i> PLAY & JOIN
+                        </a>
+                        <button onclick="copyText('micinpal.fun:24090', this, 'IP')" class="hover-effect btn-primary px-5 py-3 rounded font-display font-bold text-sm tracking-wider flex items-center justify-center gap-2 text-white">
+                            <i class="fa-solid fa-copy"></i> COPY
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Password Server Row dengan Efek Spoiler -->
+                <div class="flex flex-col sm:flex-row gap-3 items-center justify-between pt-2 border-t border-white/5">
+                    <div class="w-full relative">
+                        <label class="block text-gray-400 text-xs uppercase font-bold tracking-wider mb-1 font-sans flex items-center justify-between">
+                            <span>Server Password</span>
+                        </label>
+                        <input type="text" readonly value="joinmembershipdulu" class="spoiler-blur w-full bg-black/60 border border-white/10 rounded px-4 py-3 font-mono text-base text-yellow-400 focus:outline-none select-all" title="Arahkan kursor untuk melihat password">
+                    </div>
+                    <div class="w-full sm:w-auto shrink-0 self-end">
+                        <button onclick="copyText('joinmembershipdulu', this, 'PASSWORD')" class="hover-effect w-full sm:w-auto bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3 rounded font-display font-bold text-sm tracking-wider flex items-center justify-center gap-2 transition">
+                            <i class="fa-solid fa-key text-yellow-400"></i> COPY PASSWORD
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- LIVE STREAM SECTION -->
+    <section id="live" class="py-24 bg-secondary relative z-10 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center gap-4 mb-8 gsap-fade">
+                <h2 class="font-display text-4xl font-bold uppercase tracking-wide flex items-center gap-3">
+                    <span id="section-live-dot" class="w-3 h-3 rounded-full bg-gray-500 inline-block"></span> 
+                    MICI-YO LIVE
+                </h2>
+                <div class="h-px bg-white/10 flex-1"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 aspect-video bg-black rounded-lg overflow-hidden border border-white/10 relative shadow-2xl gsap-fade" id="yt-player-container">
+                    <div class="absolute inset-0 flex items-center justify-center flex-col text-gray-500">
+                        <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+                        <p class="text-sm font-sans uppercase tracking-widest">Memuat Status YouTube...</p>
+                    </div>
+                </div>
+                
+                <div class="glass p-8 rounded-lg flex flex-col justify-center gsap-fade" id="yt-info-container">
+                    <div class="mb-4 inline-block px-3 py-1 rounded bg-white/5 text-gray-400 text-xs font-bold uppercase tracking-widest border border-white/10 w-max" id="yt-status-badge">
+                        Checking Status
+                    </div>
+                    
+                    <h3 class="font-display font-bold text-2xl leading-tight mb-2 text-white" id="yt-title">Memuat Informasi...</h3>
+                    <p class="text-sm text-gray-400 font-sans mb-6" id="yt-channel">MicinPal Official Channel</p>
+
+                    <p class="text-sm text-gray-300 mb-8 font-sans leading-relaxed line-clamp-4" id="yt-desc">
+                        Menghubungkan ke backend server untuk memeriksa status livestream...
+                    </p>
+
+                    <div class="flex flex-col gap-3 mt-auto">
+                        <a href="#" target="_blank" id="yt-link-btn" class="hover-effect bg-red hover:bg-red-600 text-white py-3 px-6 rounded font-display font-bold tracking-wider transition-colors flex items-center justify-center gap-3">
+                            <i class="fa-brands fa-youtube text-lg"></i> WATCH ON YOUTUBE
+                        </a>
+                        <a href="#discord" class="hover-effect border border-[#5865F2] text-[#5865F2] hover:bg-[#5865F2] hover:text-white py-3 px-6 rounded font-display font-bold tracking-wider transition-colors flex items-center justify-center gap-3">
+                            <i class="fa-brands fa-discord"></i> JOIN DISCORD
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DISCORD COMMUNITY SECTION -->
+    <section id="discord" class="py-24 bg-background relative z-10">
+        <div class="max-w-4xl mx-auto px-6 gsap-fade">
+            <div class="glass p-12 rounded-xl relative overflow-hidden flex flex-col justify-center text-center items-center border-[#5865F2]/30">
+                <div class="absolute inset-0 bg-[#5865F2]/5 pointer-events-none"></div>
+                <i class="fa-brands fa-discord text-[5rem] text-[#5865F2] mb-6 relative z-10 drop-shadow-[0_0_20px_rgba(88,101,242,0.5)]"></i>
+                <h2 class="font-display text-4xl font-bold mb-4 relative z-10 uppercase tracking-wide">JOIN MICINPAL</h2>
+                <p class="text-gray-300 font-sans text-base mb-8 relative z-10 leading-relaxed max-w-xl">
+                    "Gabung bersama komunitas MicinPal di Discord untuk mendapatkan informasi server, update, event, bantuan, dan mencari teman bermain."
+                </p>
+                <a href="https://discord.gg/XpFCaCUXES" target="_blank" class="hover-effect relative z-10 bg-[#5865F2] hover:bg-[#4752C4] px-10 py-4 rounded text-white font-display font-bold text-lg tracking-wider transition shadow-[0_0_20px_rgba(88,101,242,0.4)] inline-block">
+                    JOIN DISCORD
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVER INFORMATION & RULES SECTION -->
+    <section id="info" class="py-24 bg-secondary relative z-10 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="font-display text-4xl font-bold mb-12 text-center uppercase tracking-wide gsap-fade">SERVER <span class="text-primary">INFO & RULES</span></h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 gsap-fade">
+                <div class="glass p-8 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-display font-bold text-2xl mb-6 uppercase tracking-wider text-cyan border-b border-white/10 pb-4">SERVER INFORMATION</h3>
+                        <div class="space-y-4 font-sans text-sm">
+                            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                                <span class="text-gray-400">Server Name</span><span class="font-bold text-white">MicinPal</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                                <span class="text-gray-400">Region</span><span class="font-bold text-white">Indonesia</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                                <span class="text-gray-400">Address</span><span class="font-mono font-bold text-cyan">micinpal.fun:24090</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                                <span class="text-gray-400">Password</span><span class="spoiler-blur font-mono font-bold text-yellow-400">joinmembershipdulu</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-white/5 pb-3">
+                                <span class="text-gray-400">Platform</span><span class="font-bold text-white">Palworld</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">Community</span><span class="font-bold text-[#5865F2]">Discord</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass p-8 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-display font-bold text-2xl mb-6 uppercase tracking-wider text-primary border-b border-white/10 pb-4">SERVER RULES</h3>
+                        <ul class="space-y-4 font-sans text-sm text-gray-300">
+                            <li class="flex items-start gap-3"><i class="fa-solid fa-check text-green mt-1"></i> <span><strong>Respect other players:</strong> Menjaga kesopanan, hindari rasisme & toxic berlebihan.</span></li>
+                            <li class="flex items-start gap-3"><i class="fa-solid fa-ban text-red mt-1"></i> <span><strong>No cheating:</strong> Dilarang keras menggunakan program pihak ketiga atau cheat engine.</span></li>
+                            <li class="flex items-start gap-3"><i class="fa-solid fa-ban text-red mt-1"></i> <span><strong>No exploiting:</strong> Tidak memanfaatkan celah bug untuk merusak ekonomi atau world.</span></li>
+                            <li class="flex items-start gap-3"><i class="fa-solid fa-triangle-exclamation text-warning mt-1"></i> <span><strong>No harassment:</strong> Jangan melakukan griefing berlebihan pada player baru.</span></li>
+                            <li class="flex items-start gap-3"><i class="fa-solid fa-shield-halved text-cyan mt-1"></i> <span><strong>Follow server rules:</strong> Keputusan admin adalah mutlak demi kenyamanan bersama.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section id="faq" class="py-24 bg-background relative z-10 border-t border-white/5">
+        <div class="max-w-3xl mx-auto px-6">
+            <h2 class="font-display text-4xl font-bold mb-12 text-center uppercase tracking-wide gsap-fade">FREQUENTLY ASKED <span class="text-cyan">QUESTIONS</span></h2>
+            
+            <div class="space-y-4 gsap-fade">
+                <div class="faq-item glass rounded border border-white/10 overflow-hidden">
+                    <button class="hover-effect faq-btn w-full px-6 py-5 text-left font-sans font-semibold text-base flex justify-between items-center hover:bg-white/5 transition text-white">
+                        Bagaimana cara join MicinPal?
+                        <i class="fa-solid fa-chevron-down text-sm text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 pb-5 text-sm text-gray-400 font-sans hidden leading-relaxed">
+                        Copy alamat IP: <code class="bg-black/50 px-1.5 py-0.5 rounded text-cyan">micinpal.fun:24090</code> dan Password dengan membuka spoiler di atas, lalu gunakan tombol "PLAY & JOIN".
+                    </div>
+                </div>
+                <div class="faq-item glass rounded border border-white/10 overflow-hidden">
+                    <button class="hover-effect faq-btn w-full px-6 py-5 text-left font-sans font-semibold text-base flex justify-between items-center hover:bg-white/5 transition text-white">
+                        Apakah server aktif 24/7?
+                        <i class="fa-solid fa-chevron-down text-sm text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 pb-5 text-sm text-gray-400 font-sans hidden leading-relaxed">
+                        Ya, server MicinPal beroperasi secara penuh 24 jam sehari, 7 hari seminggu dengan sistem pemeliharaan otomatis berkala.
+                    </div>
+                </div>
+                <div class="faq-item glass rounded border border-white/10 overflow-hidden">
+                    <button class="hover-effect faq-btn w-full px-6 py-5 text-left font-sans font-semibold text-base flex justify-between items-center hover:bg-white/5 transition text-white">
+                        Apakah ada wipe?
+                        <i class="fa-solid fa-chevron-down text-sm text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 pb-5 text-sm text-gray-400 font-sans hidden leading-relaxed">
+                        Kami menerapkan kebijakan tanpa wipe (no wipe) selama save data stabil dan tidak ada update mayor dari pengembang game yang memaksa reset dunia.
+                    </div>
+                </div>
+                <div class="faq-item glass rounded border border-white/10 overflow-hidden">
+                    <button class="hover-effect faq-btn w-full px-6 py-5 text-left font-sans font-semibold text-base flex justify-between items-center hover:bg-white/5 transition text-white">
+                        Apa saja rules server?
+                        <i class="fa-solid fa-chevron-down text-sm text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 pb-5 text-sm text-gray-400 font-sans hidden leading-relaxed">
+                        Aturan utama meliputi larangan cheat, eksploitasi bug, toxic berlebihan, serta kewajiban menghormati pemain lain di dalam server maupun global chat.
+                    </div>
+                </div>
+                <div class="faq-item glass rounded border border-white/10 overflow-hidden">
+                    <button class="hover-effect faq-btn w-full px-6 py-5 text-left font-sans font-semibold text-base flex justify-between items-center hover:bg-white/5 transition text-white">
+                        Bagaimana cara report player?
+                        <i class="fa-solid fa-chevron-down text-sm text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 pb-5 text-sm text-gray-400 font-sans hidden leading-relaxed">
+                        Anda dapat melaporkan pemain yang melanggar aturan melalui server Discord resmi kami dengan menyertakan bukti screenshot atau video jika perlu.
+                    </div>
+                </div>
+                <div class="faq-item glass rounded border border-white/10 overflow-hidden">
+                    <button class="hover-effect faq-btn w-full px-6 py-5 text-left font-sans font-semibold text-base flex justify-between items-center hover:bg-white/5 transition text-white">
+                        Bagaimana cara bergabung Discord?
+                        <i class="fa-solid fa-chevron-down text-sm text-gray-500 transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-content px-6 pb-5 text-sm text-gray-400 font-sans hidden leading-relaxed">
+                        Cukup klik tombol "Join Discord" di bagian atas atau section Discord halaman ini untuk langsung masuk ke server komunitas kami.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#070A0F] border-t border-white/10 pt-16 pb-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <div class="lg:col-span-2">
+                <a href="#home" class="font-display font-bold text-3xl tracking-wider mb-4 inline-block flex items-center gap-2">
+                    <img src="https://palworld.gg/_ipx/q_80&s_130x130/images/full_palicon/T_ChickenPal_icon_normal.png" alt="MicinPal Logo" class="w-8 h-8 rounded-full border border-cyan/40 bg-card p-1 object-cover">
+                    <span>MICIN<span class="text-cyan">PAL</span></span>
+                </a>
+                <p class="text-gray-500 text-sm max-w-sm font-sans leading-relaxed">
+                    Server Palworld Indonesia untuk bermain, membangun, menjelajah, dan bermain bersama komunitas secara stabil dan profesional.
+                </p>
+            </div>
+            <div>
+                <h4 class="font-display font-bold text-white text-lg mb-4 uppercase tracking-wider">Navigation</h4>
+                <ul class="space-y-2 text-sm text-gray-500 font-sans">
+                    <li><a href="#home" class="hover-effect hover:text-cyan transition">Home</a></li>
+                    <li><a href="#live" class="hover-effect hover:text-cyan transition">Live Stream</a></li>
+                    <li><a href="#discord" class="hover-effect hover:text-cyan transition">Discord</a></li>
+                    <li><a href="#info" class="hover-effect hover:text-cyan transition">Rules & Info</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-display font-bold text-white text-lg mb-4 uppercase tracking-wider">Community</h4>
+                <ul class="space-y-2 text-sm text-gray-500 font-sans">
+                    <li><a href="#discord" class="hover-effect hover:text-[#5865F2] transition">Discord Server</a></li>
+                    <li><a href="#faq" class="hover-effect hover:text-cyan transition">FAQ</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-xs text-gray-600 font-sans">&copy; 2026 MicinPal Server. Not affiliated with Pocketpair, Inc.</p>
+            <div class="flex gap-4 text-gray-500 text-xl">
+                <a href="#discord" class="hover-effect hover:text-[#5865F2] transition"><i class="fa-brands fa-discord"></i></a>
+                <a href="#live" class="hover-effect hover:text-red transition"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    initGSAP();
+                }, 400);
+            }, 1000);
+        });
+
+        function initGSAP() {
+            gsap.from(".gsap-hero", { y: 30, opacity: 0, duration: 0.9, stagger: 0.15, ease: "power3.out" });
+            
+            gsap.to("#parallax-bg", {
+                yPercent: 20, ease: "none",
+                scrollTrigger: { trigger: "#home", start: "top top", end: "bottom top", scrub: true }
+            });
+
+            gsap.utils.toArray('.gsap-fade').forEach(el => {
+                gsap.from(el, {
+                    scrollTrigger: { trigger: el, start: "top 85%" },
+                    y: 30, opacity: 0, duration: 0.7, ease: "power2.out"
+                });
+            });
+        }
+
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorRing = document.querySelector('.cursor-ring');
+        if(cursorDot && cursorRing) {
+            window.addEventListener('mousemove', (e) => {
+                cursorDot.style.left = `${e.clientX}px`;
+                cursorDot.style.top = `${e.clientY}px`;
+                cursorRing.style.left = `${e.clientX}px`;
+                cursorRing.style.top = `${e.clientY}px`;
+            });
+        }
+
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('glass-nav');
+                nav.classList.replace('py-5', 'py-3');
+            } else {
+                nav.classList.remove('glass-nav');
+                nav.classList.replace('py-3', 'py-5');
+            }
+        });
+
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const btn = item.querySelector('.faq-btn');
+            const content = item.querySelector('.faq-content');
+            const icon = item.querySelector('i');
+
+            btn.addEventListener('click', () => {
+                const isOpen = !content.classList.contains('hidden');
+                
+                faqItems.forEach(otherItem => {
+                    otherItem.querySelector('.faq-content').classList.add('hidden');
+                    otherItem.querySelector('i').style.transform = 'rotate(0deg)';
+                });
+
+                if (!isOpen) {
+                    content.classList.remove('hidden');
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+
+        function copyText(text, btn, type) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<i class="fa-solid fa-check mr-2"></i> ${type} COPIED!`;
+                btn.classList.add('bg-green', 'text-white');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('bg-green', 'text-white');
+                }, 2000);
+            });
+        }
+
+        /* ==========================================
+           YOUTUBE LIVE MANAGER
+        ========================================== */
+        class MicinPalAppManager {
+            constructor() {
+                this.fetchLiveStatus();
+                setInterval(() => {
+                    this.fetchLiveStatus();
+                }, 120000);
+            }
+
+            async fetchLiveStatus() {
+                const playerContainer = document.getElementById('yt-player-container');
+                const titleEl = document.getElementById('yt-title');
+                const channelEl = document.getElementById('yt-channel');
+                const descEl = document.getElementById('yt-desc');
+                const linkBtn = document.getElementById('yt-link-btn');
+                const statusBadge = document.getElementById('yt-status-badge');
+                
+                const navLiveIndicator = document.getElementById('nav-live-indicator');
+                const sectionLiveDot = document.getElementById('section-live-dot');
+
+                try {
+                    const response = await fetch('/api/youtube/live');
+                    if (!response.ok) throw new Error("API request failed");
+                    
+                    const data = await response.json();
+
+                    if (data.error) {
+                        this.renderErrorState(titleEl, descEl, statusBadge, playerContainer);
+                        return;
+                    }
+
+                    const videoId = data.videoId;
+                    const isLive = data.live;
+                    const currentStoredId = playerContainer.dataset.videoId;
+
+                    if (isLive) {
+                        navLiveIndicator.className = "w-2 h-2 rounded-full bg-red badge-live inline-block";
+                        sectionLiveDot.className = "w-3 h-3 rounded-full bg-red badge-live inline-block";
+                        
+                        statusBadge.className = "mb-4 inline-block px-3 py-1 rounded bg-red/20 text-red text-xs font-bold uppercase tracking-widest border border-red/30 w-max badge-live";
+                        statusBadge.innerHTML = `<i class="fa-solid fa-broadcast-tower mr-1"></i> LIVE NOW`;
+
+                        titleEl.textContent = data.title;
+                        channelEl.textContent = data.channelTitle || "MicinPal Official Channel";
+                        descEl.textContent = data.description;
+                        linkBtn.href = data.url;
+
+                        if (currentStoredId !== videoId) {
+                            playerContainer.dataset.videoId = videoId;
+                            playerContainer.innerHTML = `<iframe class="w-full h-full absolute inset-0" src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&enablejsapi=1" title="${data.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                        }
+                    } else {
+                        navLiveIndicator.className = "w-2 h-2 rounded-full bg-gray-500 inline-block";
+                        sectionLiveDot.className = "w-3 h-3 rounded-full bg-gray-500 inline-block";
+
+                        statusBadge.className = "mb-4 inline-block px-3 py-1 rounded bg-white/5 text-gray-400 text-xs font-bold uppercase tracking-widest border border-white/10 w-max";
+                        statusBadge.innerHTML = `<i class="fa-solid fa-video mr-1"></i> LATEST VIDEO`;
+
+                        titleEl.textContent = data.title;
+                        channelEl.textContent = data.channelTitle || "MicinPal Official Channel";
+                        descEl.textContent = data.description;
+                        linkBtn.href = data.url;
+
+                        if (currentStoredId !== videoId) {
+                            playerContainer.dataset.videoId = videoId;
+                            playerContainer.innerHTML = `<iframe class="w-full h-full absolute inset-0" src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&enablejsapi=1" title="${data.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                        }
+                    }
+                } catch (error) {
+                    console.error("Failed fetching live status:", error);
+                    this.renderErrorState(titleEl, descEl, statusBadge, playerContainer);
+                }
+            }
+
+            renderErrorState(titleEl, descEl, statusBadge, playerContainer) {
+                statusBadge.className = "mb-4 inline-block px-3 py-1 rounded bg-red/20 text-red text-xs font-bold uppercase tracking-widest border border-red/30 w-max";
+                statusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-1"></i> API ERROR`;
+
+                titleEl.textContent = "YouTube Tidak Dapat Diakses";
+                descEl.textContent = "YouTube tidak dapat diakses saat ini. Silakan coba lagi beberapa saat.";
+                playerContainer.innerHTML = `<div class="absolute inset-0 flex items-center justify-center flex-col text-gray-500 bg-card"><i class="fa-solid fa-video-slash text-4xl mb-4"></i><p class="font-sans text-sm uppercase tracking-widest">NO VIDEO AVAILABLE</p></div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new MicinPalAppManager();
+        });
+    </script>
+</body>
+</html>

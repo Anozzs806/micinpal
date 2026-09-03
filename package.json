@@ -1,0 +1,16 @@
+{
+  "name": "micinpal-website",
+  "version": "1.0.0",
+  "description": "MicinPal Palworld Community Server Website",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "gamedig": "^5.3.3",
+    "node-fetch": "^2.7.0",
+    "rcon-client": "^4.2.5"
+  }
+}
